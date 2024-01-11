@@ -1,0 +1,40 @@
+version: '3'
+services:
+  saic-website:
+    build:
+      context: SAIC-Website
+      dockerfile: Dockerfile
+    container_name: saic-website
+    ports:
+      - "8080:80"
+
+  github-languages:
+    depends_on:
+      - github-languages-postgres
+    build:
+      context: github-languages
+      dockerfile: Dockerfile
+    environment:
+      - PG_URL=postgres://github-languages:password@github-languages-postgres/github-languages_production
+      - SECRET_KEY_BASE=ksdgnjkfdgnjkdfnkgnfjkdgnfjkdn
+    ports:
+      - "3000:3000"
+    networks:
+      - github-languages
+
+  github-languages-postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: github-languages
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: github-languages_production
+    networks:
+      - github-languages
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+networks:
+  github-languages:
+
+volumes:
+  postgres_data:
